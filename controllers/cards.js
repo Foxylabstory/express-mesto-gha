@@ -1,4 +1,5 @@
 const Card = require("../models/card");
+const {errorMessage} = require("../utils/customErrors");
 
 const createCard = (req, res) => {
   const { name, link } = req.body;
@@ -7,19 +8,33 @@ const createCard = (req, res) => {
     .then((card) => {
       res.send(card);
     })
-    .catch(() => res.status(500).send({ message: "Произошла ошибка" }));
+    .catch((err) => {
+      errorMessage(err, req, res);
+    });
 };
 
 const findCards = (req, res) => {
   Card.find({})
     .then((card) => res.send(card))
-    .catch(() => res.status(500).send({ message: "Произошла ошибка" }));
+    .catch((err) => {
+      errorMessage(err, req, res);
+    });
 };
 
 const deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
-    .then((respond) => res.send(respond))
-    .catch(() => res.status(500).send({ message: "Произошла ошибка" }));
+    .then((card) => {
+      if (!card) {
+        res
+          .status(404)
+          .send({ message: "Карточка с указанным _id не найдена" });
+        return;
+      }
+      res.send(card);
+    })
+    .catch((err) => {
+      errorMessage(err, req, res);
+    });
 };
 
 const likeCard = (req, res) => {
@@ -28,8 +43,18 @@ const likeCard = (req, res) => {
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true }
   )
-    .then((respond) => res.send(respond))
-    .catch(() => res.status(500).send({ message: "Произошла ошибка" }));
+    .then((card) => {
+      if (!card) {
+        res
+          .status(404)
+          .send({ message: "Передан несуществующий _id карточки" });
+        return;
+      }
+      res.send(card);
+    })
+    .catch((err) => {
+      errorMessage(err, req, res);
+    });
 };
 
 const dislikeCard = (req, res) => {
@@ -38,8 +63,18 @@ const dislikeCard = (req, res) => {
     { $pull: { likes: req.user._id } }, // убрать _id из массива
     { new: true }
   )
-    .then((respond) => res.send(respond))
-    .catch(() => res.status(500).send({ message: "Произошла ошибка" }));
+    .then((card) => {
+      if (!card) {
+        res
+          .status(404)
+          .send({ message: "Передан несуществующий _id карточки" });
+        return;
+      }
+      res.send(card);
+    })
+    .catch((err) => {
+      errorMessage(err, req, res);
+    });
 };
 
 module.exports = { createCard, findCards, deleteCard, likeCard, dislikeCard };

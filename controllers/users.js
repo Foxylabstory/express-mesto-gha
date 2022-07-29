@@ -1,4 +1,5 @@
 const User = require("../models/user");
+const {errorMessage} = require("../utils/customErrors");
 
 const createUser = (req, res) => {
   const { name, about, avatar } = req.body;
@@ -6,7 +7,9 @@ const createUser = (req, res) => {
     .then((user) => {
       res.send(user);
     })
-    .catch(() => res.status(500).send({ message: "Произошла ошибка" }));
+    .catch((err) => {
+      errorMessage(err, req, res);
+    });
 };
 
 const findUsers = (req, res) => {
@@ -14,15 +17,25 @@ const findUsers = (req, res) => {
     .then((users) => {
       res.send(users);
     })
-    .catch(() => res.status(500).send({ message: "Произошла ошибка" }));
+    .catch((err) => {
+      errorMessage(err, req, res);
+    });
 };
 
 const findUserById = (req, res) => {
   User.findById(req.params.userId)
     .then((user) => {
+      if (!user) {
+        res
+          .status(404)
+          .send({ message: "Пользователь по указанному _id не найден" });
+        return;
+      }
       res.send(user);
     })
-    .catch(() => res.status(500).send({ message: "Произошла ошибка" }));
+    .catch((err) => {
+      errorMessage(err, req, res);
+    });
 };
 
 const updateUserInfo = (req, res) => {
@@ -37,9 +50,17 @@ const updateUserInfo = (req, res) => {
     }
   )
     .then((user) => {
+      if (!user) {
+        res
+          .status(404)
+          .send({ message: "Пользователь по указанному _id не найден" });
+        return;
+      }
       res.send(user);
     })
-    .catch(() => res.status(500).send({ message: "Произошла ошибка" }));
+    .catch((err) => {
+      errorMessage(err, req, res);
+    });
 };
 
 const updateUserAvatar = (req, res) => {
@@ -54,9 +75,23 @@ const updateUserAvatar = (req, res) => {
     }
   )
     .then((user) => {
+      if (!user) {
+        res
+          .status(404)
+          .send({ message: "Пользователь по указанному _id не найден" });
+        return;
+      }
       res.send(user);
     })
-    .catch(() => res.status(500).send({ message: "Произошла ошибка" }));
-}
+    .catch((err) => {
+      errorMessage(err, req, res);
+    });
+};
 
-module.exports = { createUser, findUsers, findUserById, updateUserInfo, updateUserAvatar };
+module.exports = {
+  createUser,
+  findUsers,
+  findUserById,
+  updateUserInfo,
+  updateUserAvatar,
+};
