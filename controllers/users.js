@@ -1,5 +1,5 @@
-const User = require("../models/user");
-const {errorMessage} = require("../utils/customErrors");
+const User = require('../models/user');
+const { errorMessage } = require('../utils/customErrors');
 
 const createUser = (req, res) => {
   const { name, about, avatar } = req.body;
@@ -28,7 +28,7 @@ const findUserById = (req, res) => {
       if (!user) {
         res
           .status(404)
-          .send({ message: "Пользователь по указанному _id не найден" });
+          .send({ message: 'Пользователь по указанному _id не найден' });
         return;
       }
       res.send(user);
@@ -47,13 +47,13 @@ const updateUserInfo = (req, res) => {
       new: true, // обработчик then получит на вход обновлённую запись
       runValidators: true, // данные будут валидированы перед изменением
       upsert: true, // если пользователь не найден, он будет создан
-    }
+    },
   )
     .then((user) => {
       if (!user) {
         res
           .status(404)
-          .send({ message: "Пользователь по указанному _id не найден" });
+          .send({ message: 'Пользователь по указанному _id не найден' });
         return;
       }
       res.send(user);
@@ -72,13 +72,13 @@ const updateUserAvatar = (req, res) => {
       new: true, // обработчик then получит на вход обновлённую запись
       runValidators: true, // данные будут валидированы перед изменением
       upsert: true, // если пользователь не найден, он будет создан
-    }
+    },
   )
     .then((user) => {
       if (!user) {
         res
           .status(404)
-          .send({ message: "Пользователь по указанному _id не найден" });
+          .send({ message: 'Пользователь по указанному _id не найден' });
         return;
       }
       res.send(user);
