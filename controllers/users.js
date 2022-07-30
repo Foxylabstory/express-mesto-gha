@@ -1,11 +1,12 @@
 const User = require('../models/user');
 const { errorMessage } = require('../utils/customErrors');
+const { CREATED, NOT_FOUND } = require('../utils/statuses');
 
 const createUser = (req, res) => {
   const { name, about, avatar } = req.body;
   User.create({ name, about, avatar })
     .then((user) => {
-      res.send(user);
+      res.status(CREATED).send(user);
     })
     .catch((err) => {
       errorMessage(err, req, res);
@@ -27,7 +28,7 @@ const findUserById = (req, res) => {
     .then((user) => {
       if (!user) {
         res
-          .status(404)
+          .status(NOT_FOUND)
           .send({ message: 'Пользователь по указанному _id не найден' });
         return;
       }
@@ -46,13 +47,12 @@ const updateUserInfo = (req, res) => {
     {
       new: true, // обработчик then получит на вход обновлённую запись
       runValidators: true, // данные будут валидированы перед изменением
-      upsert: true, // если пользователь не найден, он будет создан
     },
   )
     .then((user) => {
       if (!user) {
         res
-          .status(404)
+          .status(NOT_FOUND)
           .send({ message: 'Пользователь по указанному _id не найден' });
         return;
       }
@@ -71,13 +71,12 @@ const updateUserAvatar = (req, res) => {
     {
       new: true, // обработчик then получит на вход обновлённую запись
       runValidators: true, // данные будут валидированы перед изменением
-      upsert: true, // если пользователь не найден, он будет создан
     },
   )
     .then((user) => {
       if (!user) {
         res
-          .status(404)
+          .status(NOT_FOUND)
           .send({ message: 'Пользователь по указанному _id не найден' });
         return;
       }

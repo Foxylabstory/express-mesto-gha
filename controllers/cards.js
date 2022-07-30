@@ -1,12 +1,12 @@
 const Card = require('../models/card');
 const { errorMessage } = require('../utils/customErrors');
+const { CREATED, NOT_FOUND } = require('../utils/statuses');
 
 const createCard = (req, res) => {
   const { name, link } = req.body;
-  console.log(req.user._id); // _id станет доступен
   Card.create({ name, link, owner: req.user._id })
     .then((card) => {
-      res.send(card);
+      res.status(CREATED).send(card);
     })
     .catch((err) => {
       errorMessage(err, req, res);
@@ -26,7 +26,7 @@ const deleteCard = (req, res) => {
     .then((card) => {
       if (!card) {
         res
-          .status(404)
+          .status(NOT_FOUND)
           .send({ message: 'Карточка с указанным _id не найдена' });
         return;
       }
@@ -46,7 +46,7 @@ const likeCard = (req, res) => {
     .then((card) => {
       if (!card) {
         res
-          .status(404)
+          .status(NOT_FOUND)
           .send({ message: 'Передан несуществующий _id карточки' });
         return;
       }
@@ -66,7 +66,7 @@ const dislikeCard = (req, res) => {
     .then((card) => {
       if (!card) {
         res
-          .status(404)
+          .status(NOT_FOUND)
           .send({ message: 'Передан несуществующий _id карточки' });
         return;
       }

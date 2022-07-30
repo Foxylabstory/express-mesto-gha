@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const { NOT_FOUND } = require('./utils/statuses');
 
 const { PORT = 3000, BASE_PATH } = process.env;
 
@@ -20,7 +21,7 @@ app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 
 app.use('/*', (req, res) => {
-  res.status(404).send({ message: 'Cтраницы не существует' });
+  res.status(NOT_FOUND).send({ message: 'Cтраницы не существует' });
 });
 
 async function main() {
