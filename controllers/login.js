@@ -1,3 +1,4 @@
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const { UNAUTHORIZED } = require('../utils/statuses');
 
@@ -6,7 +7,13 @@ module.exports.login = (req, res) => {
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      res.send(user);
+      const token = jwt.sign({ _id: user._id }, 'super-strong-secret-key', { expiresIn: '7d' });
+      res
+        .cookie('jwt', token, { // А как еще можно работать с куками? Теория описывает только как это сделать в теле ответа
+          maxAge: 3600000 * 24 * 7,
+          httpOnly: true, // выключили доступ к куке из ЖС
+          sameSite: true, // принимает/отправляет куки только с того же домена
+        }).send(user + token); // только для того что бы посмотреть ответ
     })
     .catch((err) => {
       res
