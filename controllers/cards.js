@@ -1,6 +1,6 @@
 const Card = require('../models/card');
 const { errorMessage } = require('../utils/customErrors');
-const { CREATED, NOT_FOUND } = require('../utils/statuses');
+const { CREATED, NOT_FOUND, CONFLICT } = require('../utils/statuses');
 
 const createCard = (req, res) => {
   const { name, link } = req.body;
@@ -22,7 +22,7 @@ const findCards = (req, res) => {
 };
 
 const deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.cardId)
+  Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
         res
@@ -30,11 +30,30 @@ const deleteCard = (req, res) => {
           .send({ message: 'Карточка с указанным _id не найдена' });
         return;
       }
-      res.send(card);
+      if (card.owner.toString() !== req.user._id) {
+        res
+          .status(CONFLICT)
+          .send({ message: 'Удаляемая карточка принадлежит другому пользователю' });
+        return;
+      }
+      Card.findByIdAndRemove(req.params.cardId)
+        .then((cardForDeleting) => {
+          if (!cardForDeleting) {
+            res
+              .status(NOT_FOUND)
+              .send({ message: 'Карточка с указанным _id не найдена' });
+            return;
+          }
+          res.send(cardForDeleting);
+        })
+        .catch((err) => {
+          errorMessage(err, req, res);
+        });
     })
     .catch((err) => {
       errorMessage(err, req, res);
     });
+  /*  */
 };
 
 const likeCard = (req, res) => {

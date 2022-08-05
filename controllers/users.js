@@ -29,7 +29,6 @@ const findUsers = (req, res) => {
 };
 
 const findUserById = (req, res) => {
-  console.log(req.params.userId);
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
@@ -38,7 +37,6 @@ const findUserById = (req, res) => {
           .send({ message: 'Пользователь по указанному _id не найден' });
         return;
       }
-      console.log(req.user._id);
       res.send(user);
     })
     .catch((err) => {
@@ -47,9 +45,6 @@ const findUserById = (req, res) => {
 };
 
 const getUserInfo = (req, res) => {
-  console.log('getUserInfo');
-  console.log(req.user._id);
-  // const { id } = req.user._id;
   User.findById(req.user._id)
     .then((user) => {
       if (!user) {
