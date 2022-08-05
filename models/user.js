@@ -6,15 +6,15 @@ const userSchema = new mongoose.Schema({
   name: {
     type: String,
     // required: false,
-    // minlength: [2, 'Must be at least 2, you got {VALUE}'],
-    // maxlength: [30, 'Must be no more than 30, you got {VALUE}'],
+    minlength: [2, 'Must be at least 2, you got {VALUE}'],
+    maxlength: [30, 'Must be no more than 30, you got {VALUE}'],
     default: 'Жак-Ив Кусто',
   },
   about: {
     type: String,
     // required: false,
-    // minlength: [2, 'Must be at least 2, you got {VALUE}'],
-    // maxlength: [30, 'Must be no more than 30, you got {VALUE}'],
+    minlength: [2, 'Must be at least 2, you got {VALUE}'],
+    maxlength: [30, 'Must be no more than 30, you got {VALUE}'],
     default: 'Исследователь',
   },
   avatar: {

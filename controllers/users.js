@@ -29,7 +29,28 @@ const findUsers = (req, res) => {
 };
 
 const findUserById = (req, res) => {
+  console.log(req.params.userId);
   User.findById(req.params.userId)
+    .then((user) => {
+      if (!user) {
+        res
+          .status(NOT_FOUND)
+          .send({ message: 'Пользователь по указанному _id не найден' });
+        return;
+      }
+      console.log(req.user._id);
+      res.send(user);
+    })
+    .catch((err) => {
+      errorMessage(err, req, res);
+    });
+};
+
+const getUserInfo = (req, res) => {
+  console.log('getUserInfo');
+  console.log(req.user._id);
+  // const { id } = req.user._id;
+  User.findById(req.user._id)
     .then((user) => {
       if (!user) {
         res
@@ -96,6 +117,7 @@ module.exports = {
   createUser,
   findUsers,
   findUserById,
+  getUserInfo,
   updateUserInfo,
   updateUserAvatar,
 };
