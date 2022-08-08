@@ -14,7 +14,6 @@ module.exports = (req, res, next) => {
   // }
   // const token = cookie.replace('jwt=', '');
   const token = req.cookies.jwt;
-  console.log(res.cookie.jwt);
   let payload;
   try {
     payload = jwt.verify(token, SECRET_KEY);
