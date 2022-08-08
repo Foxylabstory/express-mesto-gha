@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs');
+const { HASH_LENGTH } = require('../environment/env');
 const User = require('../models/user');
 const { errorMessage } = require('../utils/customErrors');
 const { CREATED, NOT_FOUND } = require('../utils/statuses');
@@ -7,7 +8,7 @@ const createUser = (req, res) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
-  bcrypt.hash(password, 10).then((hash) => User.create({
+  bcrypt.hash(password, HASH_LENGTH).then((hash) => User.create({
     name, about, avatar, email, password: hash,
   }))
     .then((user) => {

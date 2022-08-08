@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const { SECRET_KEY } = require('../environment/env');
 const User = require('../models/user');
 const { UNAUTHORIZED } = require('../utils/statuses');
 
@@ -7,7 +8,7 @@ module.exports.login = (req, res) => {
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, 'super-strong-secret-key', { expiresIn: '7d' });
+      const token = jwt.sign({ _id: user._id }, SECRET_KEY, { expiresIn: '7d' });
       res
         .cookie('jwt', token, { // А как еще можно работать с куками? Теория описывает только как это сделать в теле ответа
           maxAge: 3600000 * 24 * 7,
