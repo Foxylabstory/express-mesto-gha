@@ -1,10 +1,13 @@
 const bcrypt = require('bcryptjs');
-const { HASH_LENGTH } = require('../environment/env');
+const jwt = require('jsonwebtoken');
+const { HASH_LENGTH, SECRET_KEY } = require('../environment/env');
 const User = require('../models/user');
-const { errorMessage } = require('../utils/customErrors');
-const { CREATED, NOT_FOUND } = require('../utils/statuses');
+const { customError } = require('../errors/customErrors');
+const { CREATED } = require('../errors/errorStatuses');
+const AuthorizationError = require('../errors/authorizationError');
+const NotFoundError = require('../errors/notFoundError');
 
-const createUser = (req, res) => {
+const createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -15,53 +18,66 @@ const createUser = (req, res) => {
       res.status(CREATED).send(user);
     })
     .catch((err) => {
-      errorMessage(err, req, res);
+      customError(err, req, res, next);
     });
 };
 
-const findUsers = (req, res) => {
+const login = (req, res, next) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      if (!user) {
+        throw new AuthorizationError('Пользователь не найден');
+      }
+      const token = jwt.sign({ _id: user._id }, SECRET_KEY, { expiresIn: '7d' });
+      res
+        .cookie('jwt', token, { // А как еще можно работать с куками? Теория описывает только как это сделать в теле ответа
+          maxAge: 3600000 * 24 * 7,
+          httpOnly: true, // выключили доступ к куке из ЖС
+          sameSite: true, // принимает/отправляет куки только с того же домена
+        }).send(user + token); // только для того что бы посмотреть ответ
+    })
+    .catch((err) => next(err));
+};
+
+const findUsers = (req, res, next) => {
   User.find({})
     .then((users) => {
       res.send(users);
     })
     .catch((err) => {
-      errorMessage(err, req, res);
+      customError(err, req, res, next);
     });
 };
 
-const findUserById = (req, res) => {
+const findUserById = (req, res, next) => {
   User.findById(req.params.userId)
+    .orFail(() => {
+      throw new NotFoundError('Запрашиваемые данные по указанному id не найдены');
+    })
     .then((user) => {
-      if (!user) {
-        res
-          .status(NOT_FOUND)
-          .send({ message: 'Пользователь по указанному _id не найден' });
-        return;
-      }
       res.send(user);
     })
     .catch((err) => {
-      errorMessage(err, req, res);
+      customError(err, req, res, next);
     });
 };
 
-const getUserInfo = (req, res) => {
+const getUserInfo = (req, res, next) => {
   User.findById(req.user._id)
+    .orFail(() => {
+      throw new NotFoundError('Запрашиваемые данные по указанному id не найдены');
+    })
     .then((user) => {
-      if (!user) {
-        res
-          .status(NOT_FOUND)
-          .send({ message: 'Пользователь по указанному _id не найден' });
-        return;
-      }
       res.send(user);
     })
     .catch((err) => {
-      errorMessage(err, req, res);
+      customError(err, req, res, next);
     });
 };
 
-const updateUserInfo = (req, res) => {
+const updateUserInfo = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
@@ -71,21 +87,18 @@ const updateUserInfo = (req, res) => {
       runValidators: true, // данные будут валидированы перед изменением
     },
   )
+    .orFail(() => {
+      throw new NotFoundError('Запрашиваемые данные по указанному id не найдены');
+    })
     .then((user) => {
-      if (!user) {
-        res
-          .status(NOT_FOUND)
-          .send({ message: 'Пользователь по указанному _id не найден' });
-        return;
-      }
       res.send(user);
     })
     .catch((err) => {
-      errorMessage(err, req, res);
+      customError(err, req, res, next);
     });
 };
 
-const updateUserAvatar = (req, res) => {
+const updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
@@ -94,23 +107,20 @@ const updateUserAvatar = (req, res) => {
       new: true, // обработчик then получит на вход обновлённую запись
       runValidators: true, // данные будут валидированы перед изменением
     },
-  )
+  ).orFail(() => {
+    throw new NotFoundError('Запрашиваемые данные по указанному id не найдены');
+  })
     .then((user) => {
-      if (!user) {
-        res
-          .status(NOT_FOUND)
-          .send({ message: 'Пользователь по указанному _id не найден' });
-        return;
-      }
       res.send(user);
     })
     .catch((err) => {
-      errorMessage(err, req, res);
+      customError(err, req, res, next);
     });
 };
 
 module.exports = {
   createUser,
+  login,
   findUsers,
   findUserById,
   getUserInfo,

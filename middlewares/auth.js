@@ -1,7 +1,7 @@
 /* eslint-disable no-debugger */
 const jwt = require('jsonwebtoken');
 const { SECRET_KEY } = require('../environment/env');
-const { UNAUTHORIZED } = require('../utils/statuses');
+const AuthorizationError = require('../errors/authorizationError');
 
 module.exports = (req, res, next) => {
   // достаём авторизационный заголовок
@@ -17,10 +17,9 @@ module.exports = (req, res, next) => {
   let payload;
   try {
     payload = jwt.verify(token, SECRET_KEY);
-  } catch (err) {
-    return res
-      .status(UNAUTHORIZED)
-      .send({ message: 'Необходима авторизация!' });
+  } catch (e) {
+    const err = new AuthorizationError('Необходима авторизация!');
+    next(err);
   }
   req.user = payload; // записываем пейлоуд в объект запроса
   // console.log(req.user);
