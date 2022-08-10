@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const { celebrate, Joi, errors } = require('celebrate');
 const { NOT_FOUND } = require('./errors/errorStatuses');
 const users = require('./routes/users');
 const cards = require('./routes/cards');
@@ -23,8 +24,21 @@ app.use(cookieParser());
   next();
 }); */
 
-app.post('/signin', login);
-app.post('/signup', createUser);
+app.post('/signin', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().required(),
+  }),
+}), login);
+app.post('/signup', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().required().email(),
+    password: Joi.string().required(),
+    name: Joi.string().min(2).max(30),
+    about: Joi.string().min(2).max(30),
+    avatar: Joi.string().pattern(/https?:\/\/(www\.)?[a-zA-Z\d\-.]{1,}\.[a-z]{1,6}([/a-z0-9\-._~:?#[\]@!$&'()*+,;=]*)/),
+  }),
+}), createUser);
 
 app.use(auth);
 
@@ -34,6 +48,8 @@ app.use('/cards', cards);
 app.use('/*', (req, res) => {
   res.status(NOT_FOUND).send({ message: 'Cтраницы не существует' });
 });
+
+app.use(errors()); // обработчик ошибок celebrate
 
 app.use((err, req, res, next) => {
   // если у ошибки нет статуса, выставляем 500
