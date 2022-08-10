@@ -22,6 +22,5 @@ module.exports = (req, res, next) => {
     next(err);
   }
   req.user = payload; // записываем пейлоуд в объект запроса
-  // console.log(req.user);
   return next();
 };

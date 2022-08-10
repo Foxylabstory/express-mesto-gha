@@ -2,7 +2,7 @@ const Card = require('../models/card');
 const { customError } = require('../errors/customErrors');
 const { CREATED } = require('../errors/errorStatuses');
 const NotFoundError = require('../errors/notFoundError');
-const ConflictError = require('../errors/conflictError');
+const ForbiddenError = require('../errors/forbiddenError');
 
 const createCard = (req, res, next) => {
   const { name, link } = req.body;
@@ -30,7 +30,7 @@ const deleteCard = (req, res, next) => {
     })
     .then((card) => {
       if (card.owner.toString() !== req.user._id) {
-        throw new ConflictError('Удаляемая запись принадлежит другому пользователю');
+        throw new ForbiddenError('Удаляемая запись принадлежит другому пользователю');
       }
       Card.findByIdAndRemove(req.params.cardId)
         .orFail(() => {
