@@ -46,7 +46,7 @@ userSchema.statics.findUserByCredentials = function (email, password) {
   return this.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        throw new AuthorizationError('Пользователь не cerf yf[eq ,kzlm найден');
+        throw new AuthorizationError('Пользователь не найден');
       }
       return bcrypt.compare(password, user.password)
         .then((matched) => {
